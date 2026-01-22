@@ -27,7 +27,6 @@
                 <version>1.7.1</version>
             </extension>
         </extensions>
-
         <plugins>
             <plugin>
                 <groupId>org.xolstice.maven.plugins</groupId>
@@ -45,6 +44,15 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <configuration>
+                    <java>
+                        <eclipse/>
+                    </java>
+                </configuration>
             </plugin>
         </plugins>
     </build>

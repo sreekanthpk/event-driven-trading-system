@@ -12,6 +12,15 @@
     <name>Streaming System Parent</name>
     <description>Parent POM for multi-module streaming project</description>
 
+    <profiles>
+        <profile>
+            <id>local</id>
+            <properties>
+                <allow.exec>true</allow.exec>
+            </properties>
+        </profile>
+    </profiles>
+
     <properties>
         <java.version>21</java.version>
 
@@ -161,6 +170,31 @@
                     <artifactId>maven-shade-plugin</artifactId>
                     <version>3.5.0</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>3.3.0</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>2.43.0</version> <!-- Use a recent version -->
+                    <configuration>
+                        <java>
+                            <!-- Use the Google Java Format -->
+                            <googleJavaFormat/>
+                        </java>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                            <phase>compile</phase> <!-- Binds to the compile phase -->
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -184,16 +218,4 @@
             <url>https://packages.confluent.io/maven/</url>
         </repository>
     </repositories>
-
-    <profiles>
-        <profile>
-            <id>development</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <properties>
-                <skipTests>false</skipTests>
-            </properties>
-        </profile>
-    </profiles>
 </project>
