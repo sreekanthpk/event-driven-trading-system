@@ -55,7 +55,7 @@ public class RandomInquiryGenerator {
 
         producer.send(record, (metadata, exception) -> {
             if (exception != null) {
-                exception.printStackTrace();
+                System.out.println(exception.getMessage());
             } else {
                 System.out.printf(
                         "Sent inquiry %s to %s partition=%d offset=%d%n",

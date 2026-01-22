@@ -2,75 +2,61 @@ package com.trade.stream;
 
 
 import com.trade.stream.common.Common;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.*;
 
 import java.time.Duration;
 import java.util.Collections;
-import java.util.Properties;
 import java.util.Random;
+
+import static com.trade.stream.CommonConstants.*;
 
 public class InquiryAutoTraderService {
 
-    private static final String KAFKA_BOOTSTRAP = "localhost:9092";
-    private static final String INQUIRY_TOPIC = "inquiry-topic";
     private static final Random RANDOM = new Random();
 
     public static void main(String[] args) {
 
-        // ----------------- Kafka consumer config -----------------
-        Properties consumerProps = new Properties();
-        consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_BOOTSTRAP);
-        consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "inquiry-auto-trader-group");
-        consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class.getName());
-        consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
-        consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        consumerProps.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
+        try (Consumer<Long, byte[]> consumer = KafkaUtil.createConsumer(KAFKA_BOOTSTRAP)) {
+            try (Producer<Long, byte[]> producer = KafkaUtil.createProducer(KAFKA_BOOTSTRAP)) {
 
-        // ----------------- Kafka producer config -----------------
-        Properties producerProps = new Properties();
-        producerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_BOOTSTRAP);
-        producerProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class.getName());
-        producerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
+                consumer.subscribe(Collections.singletonList(INQUIRY_TOPIC));
 
-        KafkaConsumer<String, byte[]> consumer = new KafkaConsumer<>(consumerProps);
-        KafkaProducer<String, byte[]> producer = new KafkaProducer<>(producerProps);
+                System.out.println("InquiryAutoTraderService started, listening to " + INQUIRY_TOPIC);
 
-        consumer.subscribe(Collections.singletonList(INQUIRY_TOPIC));
+                while (true) {
+                    ConsumerRecords<Long, byte[]> records = consumer.poll(Duration.ofMillis(500));
 
-        System.out.println("InquiryAutoTraderService started, listening to " + INQUIRY_TOPIC);
+                    for (ConsumerRecord<Long, byte[]> record : records) {
+                        try {
+                            Common.Inquiry inquiry = Common.Inquiry.parseFrom(record.value());
 
-        while (true) {
-            ConsumerRecords<String, byte[]> records = consumer.poll(Duration.ofMillis(500));
+                            if (inquiry.getStatus() != Common.Enums.Status.POSITION_ENRICHED) continue;
 
-            for (ConsumerRecord<String, byte[]> record : records) {
-                try {
-                    Common.Inquiry inquiry = Common.Inquiry.parseFrom(record.value());
+                            // Decide status: 1 in 10 DONE, rest NOT_DONE
+                            Common.Enums.Status newStatus = (RANDOM.nextInt(10) == 0)
+                                    ? Common.Enums.Status.DONE
+                                    : Common.Enums.Status.NOT_DONE;
 
-                    if(inquiry.getStatus() != Common.Enums.Status.POSITION_ENRICHED) continue;
-
-                    // Decide status: 1 in 10 DONE, rest NOT_DONE
-                    Common.Enums.Status newStatus = (RANDOM.nextInt(10) == 0)
-                            ? Common.Enums.Status.DONE
-                            : Common.Enums.Status.NOT_DONE;
-
-                    Common.Inquiry updatedInquiry = inquiry.toBuilder()
-                            .setVersion(inquiry.getVersion() + 1)
-                            .setStatus(newStatus)
-                            .build();
+                            Common.Inquiry updatedInquiry = inquiry.toBuilder()
+                                    .setVersion(inquiry.getVersion() + 1)
+                                    .setStatus(newStatus)
+                                    .build();
 
 
-                    // Publish updated inquiry back to Kafka
-                    producer.send(new ProducerRecord<>(INQUIRY_TOPIC, updatedInquiry.toByteArray()));
+                            // Publish updated inquiry back to Kafka
+                            producer.send(new ProducerRecord<>(INQUIRY_TOPIC, updatedInquiry.toByteArray()));
 
-                } catch (Exception e) {
-                    e.printStackTrace();
+                        } catch (Exception e) {
+                            System.out.println("InquiryAutoTraderService error: " + e.getMessage());
+                        }
+                    }
                 }
             }
         }

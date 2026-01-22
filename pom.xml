@@ -36,7 +36,6 @@
         <module>position-service</module>
         <module>websocket-backend</module>
         <module>auto-trader</module>
-        <module>web</module>
         <module>kafka</module>
         <module>redis</module>
     </modules>

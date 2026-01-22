@@ -12,66 +12,53 @@ import com.google.protobuf.util.JsonFormat;
 import java.time.Duration;
 import java.util.*;
 
+import static com.trade.stream.CommonConstants.*;
+
 public class PositionUpdaterService {
 
-    private static final String KAFKA_BOOTSTRAP = "localhost:9092";
-    private static final String INQUIRY_TOPIC = "inquiry-topic";
     private static final Jedis redis = new Jedis("localhost", 6379);
 
     private static final JsonFormat.Printer JSON_PRINTER = JsonFormat.printer();
 
     public static void main(String[] args) {
 
-        // Kafka consumer config
-        Properties consumerProps = new Properties();
-        consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_BOOTSTRAP);
-        consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "position-updater-group");
-        consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class.getName());
-        consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
-        consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        consumerProps.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
 
-        // Kafka producer config
-        Properties producerProps = new Properties();
-        producerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_BOOTSTRAP);
-        producerProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class.getName());
-        producerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
+        try (Consumer<Long, byte[]> consumer = KafkaUtil.createConsumer(KAFKA_BOOTSTRAP)) {
+            Producer<Long, byte[]> producer = KafkaUtil.createProducer(KAFKA_BOOTSTRAP);
 
-        KafkaConsumer<String, byte[]> consumer = new KafkaConsumer<>(consumerProps);
-        KafkaProducer<String, byte[]> producer = new KafkaProducer<>(producerProps);
+            consumer.subscribe(Collections.singletonList(INQUIRY_TOPIC));
 
-        consumer.subscribe(Collections.singletonList(INQUIRY_TOPIC));
+            System.out.println("PositionUpdaterService started, listening to " + INQUIRY_TOPIC);
 
-        System.out.println("PositionUpdaterService started, listening to " + INQUIRY_TOPIC);
+            while (true) {
+                ConsumerRecords<Long, byte[]> records = consumer.poll(Duration.ofMillis(500));
 
-        while (true) {
-            ConsumerRecords<String, byte[]> records = consumer.poll(Duration.ofMillis(500));
+                for (ConsumerRecord<Long, byte[]> record : records) {
+                    try {
+                        Common.Inquiry inquiry = Common.Inquiry.parseFrom(record.value());
 
-            for (ConsumerRecord<String, byte[]> record : records) {
-                try {
-                    Common.Inquiry inquiry = Common.Inquiry.parseFrom(record.value());
+                        switch (inquiry.getStatus()) {
+                            case NEW:
+                                handleNewInquiry(inquiry, producer);
+                                break;
 
-                    switch (inquiry.getStatus()) {
-                        case NEW:
-                            handleNewInquiry(inquiry, producer);
-                            break;
+                            case DONE:
+                                handleDoneInquiry(inquiry);
+                                break;
 
-                        case DONE:
-                            handleDoneInquiry(inquiry);
-                            break;
+                            default:
+                                // ignore
+                        }
 
-                        default:
-                            // ignore
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
                     }
-
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
             }
         }
     }
 
-    private static void handleNewInquiry(Common.Inquiry inquiry, KafkaProducer<String, byte[]> producer) throws Exception {
+    private static void handleNewInquiry(Common.Inquiry inquiry, Producer<Long, byte[]> producer) throws Exception {
         // Update position in memory/Redis (optional)
         String key = "position:" + inquiry.getInstrumentId() + ":" + inquiry.getBookId();
 

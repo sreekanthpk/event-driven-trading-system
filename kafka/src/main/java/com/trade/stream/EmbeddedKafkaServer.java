@@ -11,6 +11,8 @@ import java.io.File;
 import java.net.InetSocketAddress;
 import java.util.Properties;
 
+import static com.trade.stream.CommonConstants.KAFKA_BOOTSTRAP;
+
 public class EmbeddedKafkaServer {
     public static void main(String[] args) throws Exception {
 
@@ -26,7 +28,7 @@ public class EmbeddedKafkaServer {
         // ---------- Kafka Broker Config ----------
         Properties props = new Properties();
         props.put("broker.id", "0");
-        props.put("listeners", "PLAINTEXT://localhost:9092");
+        props.put("listeners", "PLAINTEXT:"+ KAFKA_BOOTSTRAP);
         props.put("log.dirs", "/tmp/kafka-logs");
         props.put("zookeeper.connect", "localhost:2181");
         props.put("offsets.topic.replication.factor", "1");
