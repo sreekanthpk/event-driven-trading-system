@@ -1,5 +1,6 @@
 package com.trade.stream;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.*;
@@ -31,7 +32,7 @@ public class PositionUpdaterService {
             System.out.println("PositionUpdaterService started, listening to " + INQUIRY_TOPIC);
 
             while (true) {
-                ConsumerRecords<Long, byte[]> records = consumer.poll(Duration.ofMillis(500));
+                ConsumerRecords<Long, byte[]> records = consumer.poll(Duration.ofMillis(100));
 
                 for (ConsumerRecord<Long, byte[]> record : records) {
                     try {
@@ -45,7 +46,6 @@ public class PositionUpdaterService {
                             case DONE:
                                 handleDoneInquiry(inquiry);
                                 break;
-
                             default:
                                 // ignore
                         }
@@ -58,7 +58,7 @@ public class PositionUpdaterService {
         }
     }
 
-    private static void handleNewInquiry(Common.Inquiry inquiry, Producer<Long, byte[]> producer) throws Exception {
+    private static void handleNewInquiry(Common.Inquiry inquiry, Producer<Long, byte[]> producer) throws InvalidProtocolBufferException {
         // Update position in memory/Redis (optional)
         String key = "position:" + inquiry.getInstrumentId() + ":" + inquiry.getBookId();
 
@@ -80,18 +80,13 @@ public class PositionUpdaterService {
         System.out.println("Processed NEW inquiry, updated and sent: " + json);
     }
 
-    private static void handleDoneInquiry(Common.Inquiry inquiry) {
+    private static void handleDoneInquiry(Common.Inquiry inquiry) throws InvalidProtocolBufferException {
         String key = "position:" + inquiry.getInstrumentId() + ":" + inquiry.getBookId();
         long qty = inquiry.getQuantity();
         long price = inquiry.getPrice();
         // Update Redis
         redis.hincrBy(key, "position", (qty*price));
-
-        try {
-            String json = JSON_PRINTER.print(inquiry);
-            System.out.println("Processed DONE inquiry, updated Redis: " + json);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+         String json = JSON_PRINTER.print(inquiry);
+         System.out.println("Processed DONE inquiry, updated Redis: " + json);
     }
 }

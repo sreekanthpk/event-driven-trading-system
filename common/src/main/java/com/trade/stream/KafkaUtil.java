@@ -5,8 +5,6 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 
-
-
 import static com.trade.stream.CommonConstants.consumerProps;
 import static com.trade.stream.CommonConstants.producerProps;
 

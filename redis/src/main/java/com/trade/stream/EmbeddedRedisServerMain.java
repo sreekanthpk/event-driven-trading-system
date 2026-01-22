@@ -30,7 +30,7 @@ public class EmbeddedRedisServerMain {
             System.out.println("Press ENTER to stop Redis...");
             System.in.read();  // wait for user input to stop
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Error while starting Embedded Redis server: " + e);
         } finally {
             server.stop();
         }
