@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package com.trade.stream.common;
+
+// --------------------------
+// Shared enums / types
+// --------------------------
+message Enums {
+  enum Side {
+    BUY = 0;
+    SELL = 1;
+  }
+  enum Status {
+    NEW = 0;
+    POSITION_ENRICHED = 1;
+    DONE = 2;
+    NOT_DONE = 3;
+  }
+}
+
+// --------------------------
+// Raw inquiry event
+// --------------------------
+message Inquiry{
+  int64 inquiry_id = 1;       // Unique ID for the inquiry
+  string book_id = 2;       // Account initiating the inquiry
+  string instrument_id = 3;    // Instrument / symbol
+  int64 quantity = 4;         // Requested quantity
+  int64 price = 5;            // Requested price
+  Enums.Side side = 6;         // BUY or SELL
+  int64 event_time = 7;        // Unix timestamp in milliseconds
+  string counterparty = 8;      // counterparty
+  int64 position = 9;
+  Enums.Status  status = 10;
+  int64 version = 11;
+}
