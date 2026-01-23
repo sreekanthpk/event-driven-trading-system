@@ -47,7 +47,7 @@ Orchestrates the start of the workflow by creating and publishing trade inquirie
 Responsible for the business logic of tracking position and enriching inquiries with position.
 
 ### Auto Trader
-A mock algo engine which is reponsible for accpting and rejecting inquiries. In real life this will depend on maket signals and various other facts in deciding the action.
+A mock algo engine which is reponsible for accpting and rejecting trades. In real life this will depend on maket signals and various other facts in deciding the action.
 
 ### Websocket Backend (Websocket Server)
 Websocket server based on Vert.x, responsible for publishing protobuf based inquiries to UI.
@@ -66,9 +66,43 @@ A simple integration test is included in the project to make sure position is ca
 
 
 ## How to Run
-### Prerequisite
+Once you checkout the project follow below instructions to start the application. Ideally you should import the prioject in to an IDE like intellij.
+
+## 🛠 Prerequisites
+
+Before you begin, ensure your environment meets the following version requirements:
+
+* **Java JDK 21**: Required for modern language features and Virtual Threads.
+    * Check version: `java -version`
+* **Apache Maven 3.9+**: For managing the Java build lifecycle.
+    * Check version: `mvn -v`
+* **Node.js 20+ (LTS)**: For the frontend development server and build tools.
+    * Check version: `node -v`
 
 ### Run
+Build the application by running below command
+```bash
+mvn clean install
+```
+Initialize nodejs by running below commands
+```bash
+cd web
+npm init -y
+npm install http-server
+```
+Run 'run' script from root folder. This script will start multiple processes. Below is a list
+1. Kafka event bus (A single node kafka cluster)
+2. Position store (A single node Redis cluster)
+3. Inquiry generator
+4. Position Service
+5. Auto Trader
+6. Websocket Server
+7. Node http server
+8. Chrome browsr with Inquiry dashboard
+   
+```bash
+run
+```
 
 ### Run integration test
 
