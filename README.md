@@ -35,7 +35,43 @@ This project is intended for:
 ## 🎯 Modules
 
 ### Kafka Event bus
+Acts as the decoupled messaging backbone that streams trade inquiries and execution events between microservices in real-time.
 
-### 
+### Position Store - Redis
+Provides a high-speed, in-memory data layer for sub-millisecond retrieval and updates of current trading positions.
+
+### Inquiry Generator 
+Orchestrates the start of the workflow by creating and publishing trade inquiries.
+
+### Position Service
+Responsible for the business logic of tracking position and enriching inquiries with position.
+
+### Auto Trader
+A mock algo engine which is reponsible for accpting and rejecting inquiries. In real life this will depend on maket signals and various other facts in deciding the action.
+
+### Websocket Backend (Websocket Server)
+Websocket server based on Vert.x, responsible for publishing protobuf based inquiries to UI.
+
+### Web(Inquiry Dashboard)
+
+<img width="1904" height="814" alt="image" src="https://github.com/user-attachments/assets/3dfcb9bc-dfd3-4bd7-a0d8-c6ba38c44dcd" />
+
+### common
+
+Protobufs and models are defined here.
+
+### Integration Test
+
+A simple integration test is included in the project to make sure position is calculated  accurately and message is sequenced.
+
+
+## How to Run
+### Prerequisite
+
+### Run
+
+### Run integration test
+
+
 
 
