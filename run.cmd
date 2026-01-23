@@ -31,7 +31,7 @@ start "Inquiry Generator" cmd /c "mvn exec:java -pl inquiry-generator"
 
 start "Web server" cmd /c "http-server ."
 
-start chrome http://127.0.0.1:8081
+start chrome http://127.0.0.1:8081/web
 
 echo ----------------------------------
 echo All modules triggered. Check individual windows for logs.
