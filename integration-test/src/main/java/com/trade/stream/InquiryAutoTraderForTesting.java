@@ -1,26 +1,23 @@
 package com.trade.stream;
 
-import static com.trade.stream.CommonConstants.*;
+import static com.trade.stream.CommonConstants.INQUIRY_TOPIC;
+import static com.trade.stream.CommonConstants.KAFKA_BOOTSTRAP;
 
 import com.trade.stream.common.Common;
 import java.time.Duration;
 import java.util.Collections;
-import java.util.Random;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.serialization.*;
 
-public class InquiryAutoTraderService {
-
-  private static final Random RANDOM = new Random();
+public class InquiryAutoTraderForTesting {
 
   public static void main(String[] args) {
 
     try (Consumer<Long, byte[]> consumer =
-        KafkaUtil.createConsumer(KAFKA_BOOTSTRAP, "auto-trader")) {
+        KafkaUtil.createConsumer(KAFKA_BOOTSTRAP, "auto-trader-for-testing")) {
       try (Producer<Long, byte[]> producer = KafkaUtil.createProducer(KAFKA_BOOTSTRAP)) {
 
         consumer.subscribe(Collections.singletonList(INQUIRY_TOPIC));
@@ -38,7 +35,7 @@ public class InquiryAutoTraderService {
 
               // Decide status: 1 in 10 DONE, rest NOT_DONE
               Common.Enums.Status newStatus =
-                  (RANDOM.nextInt(10) == 0)
+                  (inquiry.getInquiryId() % 2 == 0)
                       ? Common.Enums.Status.DONE
                       : Common.Enums.Status.NOT_DONE;
 

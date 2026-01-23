@@ -47,6 +47,7 @@
         <module>auto-trader</module>
         <module>kafka</module>
         <module>redis</module>
+        <module>integration-test</module>
     </modules>
 
     <dependencyManagement>

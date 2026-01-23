@@ -16,6 +16,10 @@ public class KafkaConsumerVerticle extends AbstractVerticle {
   private static final JsonFormat.Printer JSON_PRINTER =
       JsonFormat.printer().omittingInsignificantWhitespace();
 
+  private KafkaConsumer<Long, byte[]> consumer;
+  private int connectedClients = 0;
+  private boolean subscribed = false;
+
   @Override
   public void start() {
 
@@ -24,14 +28,34 @@ public class KafkaConsumerVerticle extends AbstractVerticle {
     config.put("key.deserializer", "org.apache.kafka.common.serialization.LongDeserializer");
     config.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer");
     config.put("group.id", "ws-ui-group");
-    config.put("auto.offset.reset", "latest");
+    config.put("auto.offset.reset", "earliest");
     config.put("enable.auto.commit", "true");
 
-    KafkaConsumer<Long, byte[]> consumer = KafkaConsumer.create(vertx, config);
-
-    consumer.subscribe(INQUIRY_TOPIC);
-
+    consumer = KafkaConsumer.create(vertx, config);
     consumer.handler(this::handleRecord);
+    vertx.eventBus().consumer("ui.client.connected", msg -> onClientConnected());
+    vertx.eventBus().consumer("ui.client.disconnected", msg -> onClientDisconnected());
+  }
+
+  private void onClientConnected() {
+    connectedClients++;
+
+    if (!subscribed) {
+      consumer.subscribe(INQUIRY_TOPIC);
+      subscribed = true;
+      System.out.println("Kafka consumer subscribed (first client connected)");
+    }
+  }
+
+  private void onClientDisconnected() {
+    connectedClients--;
+
+    if (connectedClients <= 0 && subscribed) {
+      consumer.unsubscribe();
+      subscribed = false;
+      connectedClients = 0;
+      System.out.println("Kafka consumer unsubscribed (no clients)");
+    }
   }
 
   private void handleRecord(KafkaConsumerRecord<Long, byte[]> record) {

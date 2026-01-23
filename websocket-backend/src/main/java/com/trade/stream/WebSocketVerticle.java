@@ -25,6 +25,7 @@ public class WebSocketVerticle extends AbstractVerticle {
     }
 
     System.out.println("Client connected: " + ws.remoteAddress());
+    vertx.eventBus().publish("ui.client.connected", ws.textHandlerID());
 
     var consumer = vertx.eventBus().<byte[]>consumer("ui.updates");
 
@@ -40,6 +41,7 @@ public class WebSocketVerticle extends AbstractVerticle {
 
     ws.closeHandler(
         v -> {
+          vertx.eventBus().publish("ui.client.disconnected", ws.textHandlerID());
           consumer.unregister();
           System.out.println("Client disconnected");
         });

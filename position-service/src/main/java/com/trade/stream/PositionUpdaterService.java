@@ -84,8 +84,13 @@ public class PositionUpdaterService {
     String key = "position:" + inquiry.getInstrumentId() + ":" + inquiry.getBookId();
     long qty = inquiry.getQuantity();
     long price = inquiry.getPrice();
-    // Update Redis
-    redis.hincrBy(key, "position", (qty * price));
+    long position = qty * price;
+    if (inquiry.getSide() == Common.Enums.Side.SELL) {
+      position = -position;
+    }
+
+    redis.hincrBy(key, "position", position);
+
     String json = JSON_PRINTER.print(inquiry);
     System.out.println("Processed DONE inquiry, updated Redis: " + json);
   }

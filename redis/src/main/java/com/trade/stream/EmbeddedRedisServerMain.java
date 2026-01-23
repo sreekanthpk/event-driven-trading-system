@@ -8,7 +8,7 @@ public class EmbeddedRedisServerMain {
   private RedisServer redisServer;
 
   public void start() throws Exception {
-    RedisServer redisServer =
+    redisServer =
         new RedisServerBuilder()
             .port(6379)
             .setting("maxheap 128M") // limit heap to 128 MB
@@ -28,6 +28,15 @@ public class EmbeddedRedisServerMain {
     EmbeddedRedisServerMain server = new EmbeddedRedisServerMain();
     try {
       server.start();
+
+      Runtime.getRuntime()
+          .addShutdownHook(
+              new Thread(
+                  () -> {
+                    System.out.println("Shutdown hook triggered");
+                    server.stop();
+                  }));
+
       System.out.println("Press ENTER to stop Redis...");
       System.in.read(); // wait for user input to stop
     } catch (Exception e) {
