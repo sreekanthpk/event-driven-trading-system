@@ -29,9 +29,9 @@ start "Auto Trader" cmd /c "mvn exec:java -pl auto-trader"
 echo Starting inquiry generator...
 start "Inquiry Generator" cmd /c "mvn exec:java -pl inquiry-generator"
 
-start "Web server" cmd /c "cd web && npm init -y && npm install -g http-server && http-server ."
+start "Web server" cmd /c "http-server ."
 
-start chrome http://10.0.0.9:8081
+start chrome http://127.0.0.1:8081
 
 echo ----------------------------------
 echo All modules triggered. Check individual windows for logs.
