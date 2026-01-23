@@ -78,7 +78,8 @@ Before you begin, ensure your environment meets the following version requiremen
     * Check version: `mvn -v`
 * **Node.js 20+ (LTS)**: For the frontend development server and build tools.
     * Check version: `node -v`
-
+* **Google Chrome**: Recommended browser for optimal performance and debugging.
+  
 ### Run
 Build the application by running below command
 ```bash
@@ -88,9 +89,9 @@ Initialize nodejs by running below commands
 ```bash
 cd web
 npm init -y
-npm install http-server
+npm install -g http-server
 ```
-Run 'run' script from root folder. This script will start multiple processes. Below is a list
+Run 'run' script from project root folder. This script will start multiple processes. Below is a list
 1. Kafka event bus (A single node kafka cluster)
 2. Position store (A single node Redis cluster)
 3. Inquiry generator
@@ -98,7 +99,7 @@ Run 'run' script from root folder. This script will start multiple processes. Be
 5. Auto Trader
 6. Websocket Server
 7. Node http server
-8. Chrome browsr with Inquiry dashboard
+8. Chrome browser with Inquiry dashboard
    
 ```bash
 run
@@ -106,6 +107,18 @@ run
 
 ### Run integration test
 
+Run 'integration-test' script from project root folder. This script will start multiple processes. Below is a list
+1. Kafka event bus (A single node kafka cluster)
+2. Position store (A single node Redis cluster)
+3. Inquiry generator for Integration test
+4. Position Service
+5. Auto Trader for Integration test
+6. Websocket Server
+7. Websocket client for integration testing which verifies and guarantees sequencing of inquiries and value of position.
+   
+```bash
+integration-test
+```
 
 
 
