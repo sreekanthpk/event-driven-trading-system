@@ -38,7 +38,8 @@ This project is intended for:
 
 ## 🏛 Architecture
 
-<img width="563" height="521" alt="Event Driven Trading System" src="https://github.com/user-attachments/assets/38fa3552-44c9-49a1-9bf7-6954d3e96d53" />
+<img width="724" height="684" alt="eventdriven trading drawio" src="https://github.com/user-attachments/assets/65d556e3-46a2-47f7-85df-572675dff357" />
+
 
 ## 🎯 Modules
 
