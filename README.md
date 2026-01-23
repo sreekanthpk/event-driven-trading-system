@@ -28,6 +28,14 @@ This project is intended for:
 
 ---
 
+## ⚠️ Project Status & Limitations
+
+> **Important:** This project is a **Proof of Concept** and is **not production-ready**.
+
+* **Production Readiness:** This project lacks the necessary security, logging, and scalability configurations for a production environment.
+* **No TDD:** This project does **not** demonstrate Test Driven Development (TDD).
+* **Basic Testing:** Integration tests are minimal and provide only basic coverage of core functionality.
+
 ## 🏛 Architecture
 
 <img width="563" height="521" alt="Event Driven Trading System" src="https://github.com/user-attachments/assets/38fa3552-44c9-49a1-9bf7-6954d3e96d53" />
@@ -47,7 +55,7 @@ Orchestrates the start of the workflow by creating and publishing trade inquirie
 Responsible for the business logic of tracking position and enriching inquiries with position.
 
 ### Auto Trader
-A mock algo engine which is reponsible for accpting and rejecting trades. In real life this will depend on maket signals and various other facts in deciding the action.
+A mock algo engine which is reponsible for accepting and rejecting trades. In real life this will depend on maket signals and various other facts in deciding the action.
 
 ### Websocket Backend (Websocket Server)
 Websocket server based on Vert.x, responsible for publishing protobuf based inquiries to UI.
@@ -57,13 +65,14 @@ Websocket server based on Vert.x, responsible for publishing protobuf based inqu
 <img width="1904" height="814" alt="image" src="https://github.com/user-attachments/assets/3dfcb9bc-dfd3-4bd7-a0d8-c6ba38c44dcd" />
 
 ### common
-
-Protobufs and models are defined here.
+Common module include multiple shared artifacts. 
+1. Protobuf based model defenition.
+2. Kafka Producer and Consumer utils
+3. Shared constants
 
 ### Integration Test
 
-A simple integration test is included in the project to make sure position is calculated  accurately and message is sequenced.
-
+A simple integration test is included in the project to make sure position is calculated  accurately and messages are sequenced correctly.
 
 ## How to Run
 Once you checkout the project follow below instructions to start the application. Ideally you should import the prioject in to an IDE like intellij.
@@ -119,6 +128,5 @@ Run 'integration-test' script from project root folder. This script will start m
 ```bash
 integration-test
 ```
-
 
 
