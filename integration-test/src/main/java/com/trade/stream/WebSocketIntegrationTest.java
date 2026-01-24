@@ -8,27 +8,29 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.WebSocket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import org.junit.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WebSocketIntegrationTest {
+  private static final Logger log = LoggerFactory.getLogger(WebSocketIntegrationTest.class);
+
   static List<Common.Inquiry> inquiries = new ArrayList<>();
 
   public static void main(String[] args) throws InterruptedException {
 
     Vertx vertx = Vertx.vertx();
-    CountDownLatch latch = new CountDownLatch(1);
 
     vertx
         .createHttpClient()
-        .webSocket(8080, "localhost", "/ws/inquiries")
-        .onSuccess(ws -> handleWebSocket(ws, latch))
+        .webSocket(8080, "localhost", "/ws/inquiries?clientId=test")
+        .onSuccess(WebSocketIntegrationTest::handleWebSocket)
         .onFailure(Throwable::printStackTrace);
   }
 
-  private static void handleWebSocket(WebSocket ws, CountDownLatch latch) {
+  private static void handleWebSocket(WebSocket ws) {
 
-    System.out.println("Connected to WebSocket server");
+    log.info("Connected to WebSocket server");
 
     ws.binaryMessageHandler(Buffer::getBytes);
 
@@ -38,11 +40,11 @@ public class WebSocketIntegrationTest {
             Common.Inquiry inquiry = Common.Inquiry.parseFrom(buffer.getBytes());
             verifyInquiries(inquiry);
           } catch (Exception e) {
-            System.out.println(e.getMessage());
+            log.error("Error processing inquiry", e);
           }
         });
 
-    ws.closeHandler(v -> System.out.println("WebSocket closed"));
+    ws.closeHandler(v -> log.info("WebSocket closed"));
   }
 
   private static void verifyInquiries(Common.Inquiry inquiry) {

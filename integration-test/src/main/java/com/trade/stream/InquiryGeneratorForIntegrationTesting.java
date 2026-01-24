@@ -5,8 +5,12 @@ import java.util.List;
 import java.util.Random;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class InquiryGeneratorForIntegrationTesting {
+  private static final Logger log =
+      LoggerFactory.getLogger(InquiryGeneratorForIntegrationTesting.class);
 
   private static final List<String> INSTRUMENTS = List.of("AAPL");
 
@@ -43,9 +47,9 @@ public class InquiryGeneratorForIntegrationTesting {
         record,
         (metadata, exception) -> {
           if (exception != null) {
-            System.out.println(exception.getMessage());
+            log.error("Error sending Inquiry", exception);
           } else {
-            System.out.printf(
+            log.error(
                 "Sent inquiry %s to %s partition=%d offset=%d%n",
                 inquiry.getInquiryId(), metadata.topic(), metadata.partition(), metadata.offset());
           }

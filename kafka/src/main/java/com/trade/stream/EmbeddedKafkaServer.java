@@ -12,9 +12,12 @@ import kafka.server.KafkaServer;
 import org.apache.kafka.common.utils.Time;
 import org.apache.zookeeper.server.ServerCnxnFactory;
 import org.apache.zookeeper.server.ZooKeeperServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.Option;
 
 public class EmbeddedKafkaServer {
+  private static final Logger log = LoggerFactory.getLogger(EmbeddedKafkaServer.class);
 
   private static final String ZK_DIR = "/tmp/zk";
   private static final String KAFKA_LOG_DIR = "/tmp/kafka-logs";
@@ -55,7 +58,7 @@ public class EmbeddedKafkaServer {
 
     kafkaServer.startup();
 
-    System.out.println("Kafka started clean on " + KAFKA_BOOTSTRAP);
+    log.info("Kafka started clean on " + KAFKA_BOOTSTRAP);
   }
 
   private static void deleteDir(String path) throws Exception {

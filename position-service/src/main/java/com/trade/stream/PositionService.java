@@ -49,6 +49,6 @@ public class PositionService {
       running = false;
     }
 
-    log.info("PositionProcessorApp stopped");
+    log.info("PositionService stopped");
   }
 }

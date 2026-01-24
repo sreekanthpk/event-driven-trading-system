@@ -11,8 +11,11 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class InquiryAutoTraderForTesting {
+  private static final Logger log = LoggerFactory.getLogger(InquiryAutoTraderForTesting.class);
 
   public static void main(String[] args) {
 
@@ -22,7 +25,7 @@ public class InquiryAutoTraderForTesting {
 
         consumer.subscribe(Collections.singletonList(INQUIRY_TOPIC));
 
-        System.out.println("InquiryAutoTraderService started, listening to " + INQUIRY_TOPIC);
+        log.info("InquiryAutoTraderService started, listening to " + INQUIRY_TOPIC);
 
         while (true) {
           ConsumerRecords<Long, byte[]> records = consumer.poll(Duration.ofMillis(100));
@@ -49,7 +52,7 @@ public class InquiryAutoTraderForTesting {
               producer.send(new ProducerRecord<>(INQUIRY_TOPIC, updatedInquiry.toByteArray()));
 
             } catch (Exception e) {
-              System.out.println("InquiryAutoTraderService error: " + e.getMessage());
+              log.error("InquiryAutoTraderService error: ", e);
             }
           }
         }
