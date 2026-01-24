@@ -62,9 +62,9 @@ A mock algo engine which is reponsible for accepting and rejecting trades. In re
 Websocket server based on Vert.x, responsible for publishing protobuf based inquiries to UI.
 
 ### Web(Inquiry Dashboard)
+A nodejs backed web application. Uses javascript for invoking backend websocket server. Communicate using protobuf to backend server.
 
-<img width="1904" height="814" alt="image" src="https://github.com/user-attachments/assets/3dfcb9bc-dfd3-4bd7-a0d8-c6ba38c44dcd" />
-
+![img.png](img.png)
 ### common
 Common module include multiple shared artifacts. 
 1. Protobuf based model defenition.

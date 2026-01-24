@@ -21,13 +21,17 @@ public class InquiryAutoTraderService {
 
   public static void main(String[] args) {
 
-    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-      log.info("Shutting down InquiryAutoTraderService...");
-      running = false;
-    }));
+    Runtime.getRuntime()
+        .addShutdownHook(
+            new Thread(
+                () -> {
+                  log.info("Shutting down InquiryAutoTraderService...");
+                  running = false;
+                }));
 
-    try (Consumer<Long, byte[]> consumer = KafkaUtil.createConsumer(KAFKA_BOOTSTRAP, "auto-trader");
-         Producer<Long, byte[]> producer = KafkaUtil.createProducer(KAFKA_BOOTSTRAP)) {
+    try (Consumer<Long, byte[]> consumer =
+            KafkaUtil.createConsumer(KAFKA_BOOTSTRAP, "auto-trader");
+        Producer<Long, byte[]> producer = KafkaUtil.createProducer(KAFKA_BOOTSTRAP)) {
 
       consumer.subscribe(Collections.singletonList(INQUIRY_TOPIC));
 
@@ -44,15 +48,15 @@ public class InquiryAutoTraderService {
 
             // Decide status: 1 in 10 DONE, rest NOT_DONE
             Common.Enums.Status newStatus =
-                    (ThreadLocalRandom.current().nextInt(10) == 0)
-                            ? Common.Enums.Status.DONE
-                            : Common.Enums.Status.NOT_DONE;
+                (ThreadLocalRandom.current().nextInt(10) == 0)
+                    ? Common.Enums.Status.DONE
+                    : Common.Enums.Status.NOT_DONE;
 
             Common.Inquiry updatedInquiry =
-                    inquiry.toBuilder()
-                            .setVersion(inquiry.getVersion() + 1)
-                            .setStatus(newStatus)
-                            .build();
+                inquiry.toBuilder()
+                    .setVersion(inquiry.getVersion() + 1)
+                    .setStatus(newStatus)
+                    .build();
 
             // Publish updated inquiry back to Kafka
             producer.send(new ProducerRecord<>(INQUIRY_TOPIC, updatedInquiry.toByteArray()));

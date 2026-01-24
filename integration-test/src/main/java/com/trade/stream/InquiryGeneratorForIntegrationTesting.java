@@ -3,7 +3,6 @@ package com.trade.stream;
 import com.trade.stream.common.Common;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicLong;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 

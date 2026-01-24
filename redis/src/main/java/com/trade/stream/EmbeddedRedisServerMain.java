@@ -18,11 +18,7 @@ public class EmbeddedRedisServerMain {
       return;
     }
 
-    redisServer =
-            new RedisServerBuilder()
-                    .port(6379)
-                    .setting("maxheap 128M")
-                    .build();
+    redisServer = new RedisServerBuilder().port(6379).setting("maxheap 128M").build();
     redisServer.start();
     log.info("Embedded Redis started on port 6379");
   }
@@ -41,12 +37,12 @@ public class EmbeddedRedisServerMain {
       server.start();
 
       Runtime.getRuntime()
-              .addShutdownHook(
-                      new Thread(
-                              () -> {
-                                log.info("Shutdown hook triggered");
-                                server.stop();
-                              }));
+          .addShutdownHook(
+              new Thread(
+                  () -> {
+                    log.info("Shutdown hook triggered");
+                    server.stop();
+                  }));
 
       log.info("Press ENTER to stop Redis...");
       System.in.read();

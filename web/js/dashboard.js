@@ -13,7 +13,7 @@ pb.load("../common/src/main/proto/common.proto")
   });
 
 function setupWebSocket(Inquiry) {
-  const ws = new WebSocket("ws://localhost:8080/ws/inquiries");
+  const ws = new WebSocket("ws://localhost:8080/ws/inquiries?client-1");
 
   // CRITICAL: Set binaryType so event.data is an ArrayBuffer, not a string
   ws.binaryType = "arraybuffer";
@@ -64,17 +64,12 @@ function setupWebSocket(Inquiry) {
             }
         const { row, cells } = rowInfo;
 
-
-
-
-
-
       if (inquiryData.status) {
         row.className = inquiryData.status.toLowerCase();
       }
 
-       const sideClass = inquiryData.side === "BUY" ? "side-buy" :
-                      inquiryData.side === "SELL" ? "side-sell" : "";
+       const sideClass = inquiryData.side === "BUY" ? "green-text" :
+                      inquiryData.side === "SELL" ? "red-text" : "";
 
       cells[0].textContent = inquiryData.inquiryId || "";
       cells[1].textContent = inquiryData.instrumentId || "";
@@ -84,7 +79,19 @@ function setupWebSocket(Inquiry) {
       cells[5].textContent = inquiryData.side || "";
       cells[5].className = sideClass;
       cells[6].textContent = inquiryData.status || "";
-      cells[7].textContent = (inquiryData.position / 100).toFixed(2) || 0;
+      const position = inquiryData.position || 0;
+      const positionValue = position / 100;
+      cells[7].textContent = Math.abs(positionValue).toFixed(2);
+
+      // Apply color based on sign
+      if (positionValue > 0) {
+        cells[7].className = "green-text";
+      } else if (positionValue < 0) {
+        cells[7].className = "red-text";
+      } else {
+        cells[7].className = ""; // neutral / zero
+      }
+
 
       // Optional: move updated row to top only if not already first
       if (tbody.firstChild !== row) {

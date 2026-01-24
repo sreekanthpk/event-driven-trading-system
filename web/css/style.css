@@ -44,12 +44,12 @@ tbody tr:hover {
 }
 
 
-.side-buy {
+.green-text {
   color: #28a745;
   font-weight: bold;
 }
 
-.side-sell {
+.red-text {
   color: #d93025;
   font-weight: bold;
 }

@@ -16,12 +16,15 @@ public class InquiryProducerApp {
     Producer<Long, byte[]> producer = KafkaUtil.createProducer(KAFKA_BOOTSTRAP);
     RandomInquiryGenerator generator = new RandomInquiryGenerator(producer, INQUIRY_TOPIC);
 
-    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-      log.info("Shutting down InquiryProducerApp...");
-      running = false;
-      producer.close();
-      log.info("Producer closed");
-    }));
+    Runtime.getRuntime()
+        .addShutdownHook(
+            new Thread(
+                () -> {
+                  log.info("Shutting down InquiryProducerApp...");
+                  running = false;
+                  producer.close();
+                  log.info("Producer closed");
+                }));
 
     log.info("InquiryProducerApp started, sending inquiries every 1 second");
 
