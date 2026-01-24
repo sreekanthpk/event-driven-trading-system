@@ -5,58 +5,70 @@ import static com.trade.stream.CommonConstants.*;
 import com.trade.stream.common.Common;
 import java.time.Duration;
 import java.util.Collections;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.serialization.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class InquiryAutoTraderService {
 
-  private static final Random RANDOM = new Random();
+  private static final Logger log = LoggerFactory.getLogger(InquiryAutoTraderService.class);
+  private static volatile boolean running = true;
 
   public static void main(String[] args) {
 
-    try (Consumer<Long, byte[]> consumer =
-        KafkaUtil.createConsumer(KAFKA_BOOTSTRAP, "auto-trader")) {
-      try (Producer<Long, byte[]> producer = KafkaUtil.createProducer(KAFKA_BOOTSTRAP)) {
+    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+      log.info("Shutting down InquiryAutoTraderService...");
+      running = false;
+    }));
 
-        consumer.subscribe(Collections.singletonList(INQUIRY_TOPIC));
+    try (Consumer<Long, byte[]> consumer = KafkaUtil.createConsumer(KAFKA_BOOTSTRAP, "auto-trader");
+         Producer<Long, byte[]> producer = KafkaUtil.createProducer(KAFKA_BOOTSTRAP)) {
 
-        System.out.println("InquiryAutoTraderService started, listening to " + INQUIRY_TOPIC);
+      consumer.subscribe(Collections.singletonList(INQUIRY_TOPIC));
 
-        while (true) {
-          ConsumerRecords<Long, byte[]> records = consumer.poll(Duration.ofMillis(100));
+      log.info("InquiryAutoTraderService started, listening to {}", INQUIRY_TOPIC);
 
-          for (ConsumerRecord<Long, byte[]> record : records) {
-            try {
-              Common.Inquiry inquiry = Common.Inquiry.parseFrom(record.value());
+      while (running) {
+        ConsumerRecords<Long, byte[]> records = consumer.poll(Duration.ofMillis(100));
 
-              if (inquiry.getStatus() != Common.Enums.Status.POSITION_ENRICHED) continue;
+        for (ConsumerRecord<Long, byte[]> record : records) {
+          try {
+            Common.Inquiry inquiry = Common.Inquiry.parseFrom(record.value());
 
-              // Decide status: 1 in 10 DONE, rest NOT_DONE
-              Common.Enums.Status newStatus =
-                  (RANDOM.nextInt(10) == 0)
-                      ? Common.Enums.Status.DONE
-                      : Common.Enums.Status.NOT_DONE;
+            if (inquiry.getStatus() != Common.Enums.Status.POSITION_ENRICHED) continue;
 
-              Common.Inquiry updatedInquiry =
-                  inquiry.toBuilder()
-                      .setVersion(inquiry.getVersion() + 1)
-                      .setStatus(newStatus)
-                      .build();
+            // Decide status: 1 in 10 DONE, rest NOT_DONE
+            Common.Enums.Status newStatus =
+                    (ThreadLocalRandom.current().nextInt(10) == 0)
+                            ? Common.Enums.Status.DONE
+                            : Common.Enums.Status.NOT_DONE;
 
-              // Publish updated inquiry back to Kafka
-              producer.send(new ProducerRecord<>(INQUIRY_TOPIC, updatedInquiry.toByteArray()));
+            Common.Inquiry updatedInquiry =
+                    inquiry.toBuilder()
+                            .setVersion(inquiry.getVersion() + 1)
+                            .setStatus(newStatus)
+                            .build();
 
-            } catch (Exception e) {
-              System.out.println("InquiryAutoTraderService error: " + e.getMessage());
-            }
+            // Publish updated inquiry back to Kafka
+            producer.send(new ProducerRecord<>(INQUIRY_TOPIC, updatedInquiry.toByteArray()));
+
+            log.debug("Processed inquiry {} with status {}", inquiry.getInquiryId(), newStatus);
+
+          } catch (Exception e) {
+            log.error("Error processing inquiry: {}", e.getMessage(), e);
           }
         }
       }
+
+      log.info("InquiryAutoTraderService stopped");
+
+    } catch (Exception e) {
+      log.error("Fatal error in InquiryAutoTraderService", e);
     }
   }
 }

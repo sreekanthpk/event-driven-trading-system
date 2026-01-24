@@ -9,14 +9,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 
 public class InquiryGeneratorForIntegrationTesting {
 
-  private static final AtomicLong SEQUENCE = new AtomicLong(1);
-
   private static final List<String> INSTRUMENTS = List.of("AAPL");
-
-  private static final List<Common.Enums.Side> SIDES =
-      List.of(Common.Enums.Side.BUY, Common.Enums.Side.SELL);
-
-  private static final List<String> BOOK = List.of("BOOK1", "BOOK2");
 
   private static final List<String> COUNTERPARTY = List.of("cpt1");
 

@@ -1,26 +1,37 @@
 package com.trade.stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import redis.embedded.RedisServer;
 import redis.embedded.RedisServerBuilder;
 
 public class EmbeddedRedisServerMain {
 
+  private static final Logger log = LoggerFactory.getLogger(EmbeddedRedisServerMain.class);
+
   private RedisServer redisServer;
+  private boolean stopped = false;
 
   public void start() throws Exception {
+    if (redisServer != null && redisServer.isActive()) {
+      log.info("Redis is already running");
+      return;
+    }
+
     redisServer =
-        new RedisServerBuilder()
-            .port(6379)
-            .setting("maxheap 128M") // limit heap to 128 MB
-            .build();
+            new RedisServerBuilder()
+                    .port(6379)
+                    .setting("maxheap 128M")
+                    .build();
     redisServer.start();
-    System.out.println("Embedded Redis started on port 6379");
+    log.info("Embedded Redis started on port 6379");
   }
 
   public void stop() {
-    if (redisServer != null) {
+    if (!stopped && redisServer != null) {
       redisServer.stop();
-      System.out.println("Embedded Redis stopped");
+      stopped = true;
+      log.info("Embedded Redis stopped");
     }
   }
 
@@ -30,17 +41,19 @@ public class EmbeddedRedisServerMain {
       server.start();
 
       Runtime.getRuntime()
-          .addShutdownHook(
-              new Thread(
-                  () -> {
-                    System.out.println("Shutdown hook triggered");
-                    server.stop();
-                  }));
+              .addShutdownHook(
+                      new Thread(
+                              () -> {
+                                log.info("Shutdown hook triggered");
+                                server.stop();
+                              }));
 
-      System.out.println("Press ENTER to stop Redis...");
-      System.in.read(); // wait for user input to stop
+      log.info("Press ENTER to stop Redis...");
+      System.in.read();
+
     } catch (Exception e) {
-      System.out.println("Error while starting Embedded Redis server: " + e);
+      log.error("Error starting Embedded Redis server", e);
+
     } finally {
       server.stop();
     }

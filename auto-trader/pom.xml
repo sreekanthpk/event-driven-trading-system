@@ -10,7 +10,6 @@
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>com.trade.stream</groupId>
     <artifactId>auto-trader</artifactId>
 
     <dependencies>
