@@ -9,7 +9,7 @@ This project focuses on **decoupled services**, **asynchronous processing**, and
 ## 🧠 Overview
 
 The system processes inquiry events (inquiries and positions) using an **event-driven architecture**.  
-Services communicate via **Kafka based event bus**, and updates are pushed to a **real-time UI using WebSockets**.
+Services communicate via **Kafka based event bus**, and updates are pushed to a **NodeJs based UI using WebSockets**.
 
 This project is intended for:
 - Demonstrating event-driven system design
