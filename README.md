@@ -68,6 +68,9 @@ A nodejs backed web application. Uses javascript for invoking backend websocket 
 ### common
 Common module include multiple shared artifacts. 
 1. Protobuf based model defenition.
+   
+   <img width="735" height="473" alt="image" src="https://github.com/user-attachments/assets/29d8ad9c-9dd9-4ac6-8701-c4bc5ab0fe68" />
+
 2. Kafka Producer and Consumer utils
 3. Shared constants
 
