@@ -113,6 +113,14 @@ Run 'run' script from project root folder. This script will start multiple proce
 6. Websocket Server
 7. Node http server
 8. Chrome browser with Inquiry dashboard
+```
+#Make sure Maven is installed in the command prompt
+mvn -version
+```
+If maven is not available set maven in path 
+```
+set PATH= %PATH%;%MAVEN_HOME%/bin
+```
    
 ```bash
 run
