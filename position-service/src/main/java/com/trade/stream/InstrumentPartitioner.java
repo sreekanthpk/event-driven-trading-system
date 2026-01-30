@@ -5,6 +5,9 @@ import org.apache.kafka.common.Cluster;
 
 import java.util.Map;
 
+/**
+ * Example partition key to indicate scale
+ */
 public class InstrumentPartitioner implements Partitioner {
     private final Map<String, Integer> instrumentToPartition = Map.of(
             "AAPL", 0,
